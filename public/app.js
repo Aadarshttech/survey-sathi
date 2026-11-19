@@ -56,8 +56,42 @@ const freshQuestion = type => ({
    FIRESTORE HELPERS
    ══════════════════════════════════════════════════════════════ */
 async function fetchSurveys() {
-  const snap = await db.collection('surveys').orderBy('createdAt', 'desc').get();
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  if (!state.user) return [];
+  try {
+    // Only query surveys authored by this admin
+    const snap = await db.collection('surveys')
+      .where('authorId', '==', state.user.uid)
+      .get();
+    let list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Backwards compatibility for primary account:
+    // If legacy surveys without authorId exist, claim them for this creator
+    if (state.user.email === 'aadarshapandit@gmail.com') {
+      try {
+        const legacySnap = await db.collection('surveys').get();
+        for (const d of legacySnap.docs) {
+          const data = d.data();
+          if (!data.authorId && !list.find(x => x.id === d.id)) {
+            await db.collection('surveys').doc(d.id).set({
+              authorId: state.user.uid,
+              authorEmail: state.user.email
+            }, { merge: true });
+            list.push({ id: d.id, ...data, authorId: state.user.uid, authorEmail: state.user.email });
+          }
+        }
+      } catch (_) {}
+    }
+
+    list.sort((a, b) => {
+      const ta = a.createdAt?.toMillis?.() || (a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0);
+      const tb = b.createdAt?.toMillis?.() || (b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0);
+      return tb - ta;
+    });
+    return list;
+  } catch (err) {
+    console.error('fetchSurveys error:', err);
+    return [];
+  }
 }
 async function fetchSurvey(id) {
   const doc = await db.collection('surveys').doc(id).get();
@@ -66,6 +100,11 @@ async function fetchSurvey(id) {
 }
 async function saveSurvey(survey) {
   const { id, ...data } = survey;
+  if (!state.user) throw new Error('You must be signed in to save a survey.');
+
+  data.authorId = state.user.uid;
+  data.authorEmail = state.user.email || '';
+
   if (id) {
     data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
     await db.collection('surveys').doc(id).set(data, { merge: true });
@@ -652,7 +691,9 @@ async function render(adminView) {
     state.view = adminView || 'dashboard';
     try {
       state.surveys = await fetchSurveys();
-      if (!state.survey && state.surveys.length && (state.view === 'dashboard' || state.view === 'analytics')) state.survey = state.surveys[0];
+      if (!state.surveys.find(x => x.id === state.survey?.id)) {
+        state.survey = (state.surveys.length && (state.view === 'dashboard' || state.view === 'analytics')) ? state.surveys[0] : null;
+      }
       if (state.view === 'analytics') {
         $('#app').innerHTML = await analyticsView();
       } else {
@@ -749,6 +790,8 @@ function bind() {
       if (!valid) return;
 
       try {
+        state.survey = null;
+        state.surveys = [];
         await auth.signInWithEmailAndPassword(email, password);
         // onAuthStateChanged will handle navigation
       } catch (err) {
@@ -784,6 +827,8 @@ function bind() {
       if (!valid) return;
 
       try {
+        state.survey = null;
+        state.surveys = [];
         await auth.createUserWithEmailAndPassword(email, password);
       } catch (err) {
         const msg = err.code === 'auth/email-already-in-use' ? 'Email already registered.'
@@ -1087,6 +1132,10 @@ function toast(message, error = false) {
    AUTH STATE LISTENER — single source of truth
    ══════════════════════════════════════════════════════════════ */
 auth.onAuthStateChanged(user => {
+  if (!user || (state.user && state.user.uid !== user.uid)) {
+    state.survey = null;
+    state.surveys = [];
+  }
   state.user = user;
   state.loading = false;
   const route = getRoute();
