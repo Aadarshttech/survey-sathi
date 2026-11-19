@@ -1,0 +1,27 @@
+{
+  "name": "survey-sathi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack dynamic survey platform with visual builder, conditional branching logic, participant forms, and live Firestore analytics.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node --test",
+    "deploy:rules": "firebase deploy --only firestore:rules",
+    "deploy:hosting": "firebase deploy --only hosting"
+  },
+  "keywords": [
+    "survey-builder",
+    "form-builder",
+    "conditional-logic",
+    "firebase",
+    "firestore",
+    "analytics"
+  ],
+  "author": "Survey Sathi Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

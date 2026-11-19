@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101114">
+  <title>Survey Sathi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div id="app" aria-live="polite"></div>
+
+  <!-- Firebase SDKs (compat for simpler API) -->
+  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQx2ZnBYwHZOhyrO0jaTNl5XQY44GADhE",
+      authDomain: "formloom-surveys-2026-9f3b.firebaseapp.com",
+      projectId: "formloom-surveys-2026-9f3b",
+      storageBucket: "formloom-surveys-2026-9f3b.firebasestorage.app",
+      messagingSenderId: "968315700673",
+      appId: "1:968315700673:web:4f189ef4ef205d74cfdb40"
+    };
+    firebase.initializeApp(firebaseConfig);
+    window.auth = firebase.auth();
+    window.db = firebase.firestore();
+  </script>
+  <script src="/app.js"></script>
+</body>
+</html>

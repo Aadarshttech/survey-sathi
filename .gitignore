@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+
+# Firebase
+.firebase/
+*-debug.log
+firestore-debug.log
+
+# System files
+.DS_Store
+Thumbs.db
+*.log

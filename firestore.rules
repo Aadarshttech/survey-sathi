@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Surveys: anyone can read published surveys; only authenticated admins can write
+    match /surveys/{surveyId} {
+      allow read: if resource.data.status == 'published' || request.auth != null;
+      allow create, update, delete: if request.auth != null;
+    }
+
+    // Responses: anyone can create; only authenticated admins can read
+    match /surveys/{surveyId}/responses/{responseId} {
+      allow create: if true;
+      allow read: if request.auth != null;
+    }
+  }
+}
