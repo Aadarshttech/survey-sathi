@@ -2,6 +2,9 @@
 
 A dynamic survey platform featuring a visual builder, universal conditional branching logic, participant response collection, and real-time aggregate analytics.
 
+- **Live Production URL**: [https://formloom-surveys-2026-9f3b.web.app](https://formloom-surveys-2026-9f3b.web.app)
+- **Repository**: [https://github.com/Aadarshttech/survey-sathi](https://github.com/Aadarshttech/survey-sathi)
+
 ---
 
 ## Table of Contents
